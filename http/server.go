@@ -43,10 +43,7 @@ func (s *Server) AddListenAddr(addr string) {
 
 func (s *Server) Start(ctx context.Context) error {
 	atomic.StoreInt32(&s.started, 1)
-	s.server.BaseContext = func(_ net.Listener) context.Context {
-		return ctx
-	}
-
+	s.init(ctx)
 	logServerStarting(ctx)
 
 	return s.initListeners(ctx)
