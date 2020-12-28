@@ -16,9 +16,9 @@ type Server struct {
 	Handler http.Handler
 
 	onceInit sync.Once
-	gr8service.Service
-	server  *http.Server
-	started int32
+	service  gr8service.Service
+	server   *http.Server
+	started  int32
 }
 
 func (s *Server) init(ctx context.Context) {
@@ -29,6 +29,8 @@ func (s *Server) init(ctx context.Context) {
 				return ctx
 			},
 		}
+
+		s.service = gr8service.FromBlocking(s.start, s.stop)
 	})
 }
 
@@ -41,7 +43,7 @@ func (s *Server) AddListenAddr(addr string) {
 	s.Addr = append(s.Addr, addr)
 }
 
-func (s *Server) Start(ctx context.Context) error {
+func (s *Server) start(ctx context.Context) error {
 	atomic.StoreInt32(&s.started, 1)
 	s.init(ctx)
 	logServerStarting(ctx)
@@ -109,6 +111,21 @@ func (s *Server) initListeners(ctx context.Context) error {
 }
 
 // Stop stops the server
-func (s *Server) Stop(ctx context.Context) error {
+func (s *Server) stop(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
+}
+
+func (s *Server) Start(ctx context.Context) error {
+	s.init(ctx)
+	return s.service.Start(ctx)
+}
+
+func (s *Server) Stop(ctx context.Context) error {
+	s.init(ctx)
+	return s.service.Stop(ctx)
+}
+
+func (s *Server) Wait(ctx context.Context) error {
+	s.init(ctx)
+	return s.service.Wait(ctx)
 }
