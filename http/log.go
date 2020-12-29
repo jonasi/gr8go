@@ -44,3 +44,15 @@ func logRouterHandlingNotFound(ctx context.Context, middlewares []string) {
 		"middlewares": middlewares,
 	})
 }
+
+func logTemplateHandlerError(ctx context.Context, err error) {
+	gr8log.Error(ctx, "Template render error", gr8log.Args{
+		"error": err,
+	})
+}
+
+func logSPAIndexHandlerError(ctx context.Context, err error) {
+	gr8log.Error(ctx, "Error making index handler", gr8log.Args{
+		"error": err,
+	})
+}

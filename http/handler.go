@@ -71,3 +71,10 @@ func CodeHandler(statusCode int) Handler {
 		return nil
 	})
 }
+
+func ErrorCodeHandler(statusCode int) Handler {
+	return HandlerFunc(func(w http.ResponseWriter, r *http.Request) Handler {
+		http.Error(w, http.StatusText(statusCode), statusCode)
+		return nil
+	})
+}
