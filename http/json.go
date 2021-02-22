@@ -15,7 +15,14 @@ func (h *jsonFormatter) Format(w http.ResponseWriter, r *http.Request, value int
 	return json.NewEncoder(w).Encode(value)
 }
 
-func JSONHandler(h Handler) Handler {
+func (h *jsonFormatter) FormatError(w http.ResponseWriter, r *http.Request, err error) error {
+	w.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(w).Encode(map[string]interface{}{
+		"error": err.Error(),
+	})
+}
+
+func JSONMiddleware(method, path string, h Handler) Handler {
 	return HandlerFunc(func(w http.ResponseWriter, r *http.Request) Handler {
 		acc := r.Header.Get("Accept")
 		if acc != "" {

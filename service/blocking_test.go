@@ -53,7 +53,7 @@ func TestBlocking_StartCancel(t *testing.T) {
 func TestMulti(t *testing.T) {
 	var idx int32
 	gr8service := svc.Multi(
-		gr8service.WrapStartStop(func(ctx context.Context) error {
+		gr8service.FromStartStop(func(ctx context.Context) error {
 			time.Sleep(100 * time.Millisecond)
 
 			if idx == 0 {
@@ -62,7 +62,7 @@ func TestMulti(t *testing.T) {
 
 			return nil
 		}, nil),
-		gr8service.WrapStartStop(func(ctx context.Context) error {
+		gr8service.FromStartStop(func(ctx context.Context) error {
 			if idx == 1 {
 				idx = 2
 			}

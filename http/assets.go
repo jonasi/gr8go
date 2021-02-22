@@ -58,7 +58,7 @@ type SPAConf struct {
 }
 
 // Init initializes all the routes and confs for SPAConf
-func SPA(r Router, conf SPAConf) error {
+func SPA(r *Router, conf SPAConf) error {
 	indexHandler, err := conf.indexHandler(conf.Assets)
 	if err != nil {
 		return err
