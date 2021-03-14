@@ -7,12 +7,11 @@ import (
 	"time"
 
 	gr8service "github.com/jonasi/gr8go/service"
-	"github.com/jonasi/svc"
 )
 
 // test that you can call start twice
 func TestBlocking_StartTwice(t *testing.T) {
-	gr8service := svc.WrapBlocking(nil, nil)
+	gr8service := gr8service.FromBlocking(nil, nil)
 	ctx := context.Background()
 	err := gr8service.Start(ctx)
 	if err != nil {
@@ -28,7 +27,7 @@ func TestBlocking_StartTwice(t *testing.T) {
 // will send a cancel signal to the start function ctx
 func TestBlocking_StartCancel(t *testing.T) {
 	var cancelled int32
-	gr8service := svc.WrapBlocking(func(ctx context.Context) error {
+	gr8service := gr8service.FromBlocking(func(ctx context.Context) error {
 		<-ctx.Done()
 		atomic.StoreInt32(&cancelled, 1)
 		return ctx.Err()
@@ -52,8 +51,8 @@ func TestBlocking_StartCancel(t *testing.T) {
 
 func TestMulti(t *testing.T) {
 	var idx int32
-	gr8service := svc.Multi(
-		gr8service.WrapStartStop(func(ctx context.Context) error {
+	gr8service := gr8service.Multi(
+		gr8service.FromStartStop(func(ctx context.Context) error {
 			time.Sleep(100 * time.Millisecond)
 
 			if idx == 0 {
@@ -62,7 +61,7 @@ func TestMulti(t *testing.T) {
 
 			return nil
 		}, nil),
-		gr8service.WrapStartStop(func(ctx context.Context) error {
+		gr8service.FromStartStop(func(ctx context.Context) error {
 			if idx == 1 {
 				idx = 2
 			}
