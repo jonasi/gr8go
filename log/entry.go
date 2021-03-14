@@ -1,19 +1,23 @@
 package gr8log
 
+import "time"
+
 type Entry interface {
 	Level() Level
 	Message() string
+	Time() time.Time
 }
 
 func NewEntry(level Level, msg string, args ...Args) Entry {
 	entry := mapEntry{
 		"level":   level,
 		"message": msg,
+		"time":    time.Now(),
 	}
 
 	for _, arg := range args {
 		for k, v := range arg {
-			if k == "level" || k == "message" {
+			if k == "level" || k == "message" || k == "time" {
 				continue
 			}
 
@@ -32,4 +36,8 @@ func (m mapEntry) Level() Level {
 
 func (m mapEntry) Message() string {
 	return m["message"].(string)
+}
+
+func (m mapEntry) Time() time.Time {
+	return m["time"].(time.Time)
 }
