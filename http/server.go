@@ -112,6 +112,7 @@ func (s *Server) initListeners(ctx context.Context) error {
 
 // Stop stops the server
 func (s *Server) stop(ctx context.Context) error {
+	logServerStopping(ctx)
 	return s.server.Shutdown(ctx)
 }
 

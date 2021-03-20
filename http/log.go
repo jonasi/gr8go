@@ -17,6 +17,10 @@ func logServerListening(ctx context.Context, addr net.Addr) {
 	})
 }
 
+func logServerStopping(ctx context.Context) {
+	gr8log.Info(ctx, "Server stopping")
+}
+
 func logServerListeningCleanupErr(ctx context.Context, addr net.Addr, err error) {
 	gr8log.Error(ctx, "Attempting to cleanup listeners, but encountered error for listener", gr8log.Args{
 		"addr":  addr.String(),
