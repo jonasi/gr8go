@@ -34,14 +34,34 @@ func (b *base) init() {
 	var (
 		state       = StateEmpty
 		startCh     = make(chan error)
+		startCtx    = context.Background()
 		startErr    error
 		startCancel func()
 		stopErr     error
 		tonotify    = make([]chan error, 0)
 	)
 
+	doStop := func(ctx context.Context) {
+		state = StateStopped
+		if b.stop != nil {
+			stopErr = b.stop(ctx)
+		}
+		if startCancel != nil {
+			startCancel()
+		}
+
+		for _, ch := range tonotify {
+			ch <- stopErr
+		}
+		tonotify = make([]chan error, 0)
+	}
+
 	for {
 		select {
+		case <-startCtx.Done():
+			if state == StateStarted {
+				doStop(startCtx)
+			}
 		case err := <-startCh:
 			startErr = err
 			state = StateStopped
@@ -59,7 +79,9 @@ func (b *base) init() {
 				case StateEmpty:
 					state = StateStarted
 					var ctx context.Context
+					startCtx = op.ctx
 					ctx, startCancel = context.WithCancel(op.ctx)
+					defer startCancel()
 					var err error
 					if b.start != nil {
 						if b.startBlocking {
@@ -78,19 +100,8 @@ func (b *base) init() {
 			case "stop":
 				switch state {
 				case StateStarted:
-					state = StateStopped
-					if b.stop != nil {
-						stopErr = b.stop(op.ctx)
-					}
-					if startCancel != nil {
-						startCancel()
-					}
-
+					doStop(op.ctx)
 					op.ret <- stopErr
-					for _, ch := range tonotify {
-						ch <- stopErr
-					}
-					tonotify = make([]chan error, 0)
 				case StateStopped:
 					op.ret <- stopErr
 				default:
